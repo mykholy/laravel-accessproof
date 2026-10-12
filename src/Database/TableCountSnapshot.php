@@ -20,8 +20,7 @@ final class TableCountSnapshot
         private readonly string $table,
         private readonly array $where,
         private readonly int $before,
-    ) {
-    }
+    ) {}
 
     /** @param array<string, int|float|string|bool|null> $where */
     public static function capture(ConnectionInterface $connection, string $table, array $where = []): self
