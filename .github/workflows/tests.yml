@@ -1,0 +1,53 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.3'
+            laravel: '12.0'
+            testbench: '10.0'
+          - php: '8.4'
+            laravel: '12.0'
+            testbench: '10.0'
+          - php: '8.3'
+            laravel: '13.0'
+            testbench: '11.0'
+          - php: '8.4'
+            laravel: '13.0'
+            testbench: '11.0'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, dom, xml, sqlite3, pdo_sqlite
+          coverage: none
+
+      - name: Install dependencies
+        run: composer update --no-interaction --prefer-dist --no-progress --with "laravel/framework:^${{ matrix.laravel }}" --with "orchestra/testbench:^${{ matrix.testbench }}"
+
+      - name: Validate package metadata
+        run: composer validate --strict
+
+      - name: Feature tests
+        run: composer test
+
+      - name: Static analysis
+        run: composer analyse
+
+      - name: Formatting
+        run: composer format-check
