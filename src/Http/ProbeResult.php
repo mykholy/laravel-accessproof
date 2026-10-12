@@ -13,6 +13,7 @@ use PHPUnit\Framework\Assert;
 final class ProbeResult
 {
     /**
+     * @param TestResponse<\Symfony\Component\HttpFoundation\Response> $response
      * @param list<ModelSnapshot> $snapshots
      * @param list<TableCountSnapshot> $counts
      */
@@ -23,6 +24,7 @@ final class ProbeResult
     ) {
     }
 
+    /** @return TestResponse<\Symfony\Component\HttpFoundation\Response> */
     public function response(): TestResponse
     {
         return $this->response;
