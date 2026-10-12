@@ -11,6 +11,16 @@ use Tests\TestCase;
 
 final class AccessProofConsumerTest extends TestCase
 {
+    public function test_guest_is_rejected_by_the_host_application(): void
+    {
+        Route::middleware('auth')->get('/_accessproof/private', fn () => response()->json(['ok' => true]));
+
+        AccessProof::request($this)
+            ->getJson('/_accessproof/private')
+            ->send()
+            ->assertUnauthenticated();
+    }
+
     public function test_installed_package_executes_real_laravel_routes(): void
     {
         Route::middleware('auth')->get('/_accessproof/orders/{owner}', function (string $owner) {
