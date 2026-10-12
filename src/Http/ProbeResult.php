@@ -9,22 +9,22 @@ use InvalidArgumentException;
 use Mykholy\AccessProof\Database\ModelSnapshot;
 use Mykholy\AccessProof\Database\TableCountSnapshot;
 use PHPUnit\Framework\Assert;
+use Symfony\Component\HttpFoundation\Response;
 
 final class ProbeResult
 {
     /**
-     * @param TestResponse<\Symfony\Component\HttpFoundation\Response> $response
-     * @param list<ModelSnapshot> $snapshots
-     * @param list<TableCountSnapshot> $counts
+     * @param  TestResponse<Response>  $response
+     * @param  list<ModelSnapshot>  $snapshots
+     * @param  list<TableCountSnapshot>  $counts
      */
     public function __construct(
         private readonly TestResponse $response,
         private readonly array $snapshots,
         private readonly array $counts = [],
-    ) {
-    }
+    ) {}
 
-    /** @return TestResponse<\Symfony\Component\HttpFoundation\Response> */
+    /** @return TestResponse<Response> */
     public function response(): TestResponse
     {
         return $this->response;
