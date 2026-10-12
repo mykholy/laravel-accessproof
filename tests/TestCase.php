@@ -17,6 +17,9 @@ abstract class TestCase extends Orchestra
     {
         parent::setUp();
 
+        Schema::dropIfExists('proof_orders');
+        Schema::dropIfExists('proof_users');
+
         Schema::create('proof_users', function (Blueprint $table): void {
             $table->increments('id');
             $table->unsignedInteger('tenant_id');
@@ -76,11 +79,39 @@ abstract class TestCase extends Orchestra
     protected function defineEnvironment($app): void
     {
         $app['config']->set('database.default', 'testing');
-        $app['config']->set('database.connections.testing', [
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => '',
-        ]);
+        $driver = getenv('ACCESSPROOF_TEST_DRIVER') ?: 'sqlite';
+
+        $connection = match ($driver) {
+            'sqlite' => [
+                'driver' => 'sqlite',
+                'database' => ':memory:',
+                'prefix' => '',
+            ],
+            'mysql' => [
+                'driver' => 'mysql',
+                'host' => '127.0.0.1',
+                'port' => 3306,
+                'database' => 'accessproof_tests',
+                'username' => 'root',
+                'password' => 'root',
+                'charset' => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+                'prefix' => '',
+            ],
+            'pgsql' => [
+                'driver' => 'pgsql',
+                'host' => '127.0.0.1',
+                'port' => 5432,
+                'database' => 'accessproof_tests',
+                'username' => 'postgres',
+                'password' => 'postgres',
+                'charset' => 'utf8',
+                'prefix' => '',
+            ],
+            default => throw new \InvalidArgumentException('Unsupported test database driver.'),
+        };
+
+        $app['config']->set('database.connections.testing', $connection);
     }
 
     protected function user(int $tenant): User

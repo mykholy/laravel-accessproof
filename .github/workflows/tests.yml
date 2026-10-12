@@ -53,3 +53,75 @@ jobs:
         run: |
           composer format
           git diff --exit-code -- src tests
+
+  databases:
+    name: Laravel 13 / ${{ matrix.driver }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        driver: [mysql, pgsql]
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: accessproof_tests
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: accessproof_tests
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d accessproof_tests"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      ACCESSPROOF_TEST_DRIVER: ${{ matrix.driver }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, dom, xml, pdo_mysql, pdo_pgsql, mysql, pgsql
+          coverage: none
+      - run: composer update --no-interaction --prefer-dist --no-progress --with "laravel/framework:^13.0" --with "orchestra/testbench:^11.0"
+      - run: composer test
+
+  consumer:
+    name: Independent Laravel 13 application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, dom, xml, sqlite3, pdo_sqlite
+          coverage: none
+      - name: Create independent Laravel app
+        run: composer create-project laravel/laravel:^13 consumer --no-interaction --prefer-dist --no-progress
+      - name: Install AccessProof as dev dependency
+        run: |
+          cd consumer
+          composer config repositories.accessproof path ..
+          composer require --dev "mykholy/laravel-accessproof:@dev" --no-interaction --no-progress
+      - name: Run consumer smoke fixture
+        run: |
+          cp tests/Consumer/AccessProofConsumerTest.php consumer/tests/Feature/AccessProofConsumerTest.php
+          cd consumer
+          php artisan test --filter AccessProofConsumerTest
