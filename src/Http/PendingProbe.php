@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Mykholy\AccessProof\Http;
 
+use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Testing\TestResponse;
 use Mykholy\AccessProof\Database\ModelSnapshot;
 use Mykholy\AccessProof\Database\TableCountSnapshot;
 use Mykholy\AccessProof\Exceptions\InvalidProbe;
 use Mykholy\AccessProof\Exceptions\UnsafeEnvironment;
+use PHPUnit\Framework\TestCase;
 
 final class PendingProbe
 {
@@ -33,8 +35,18 @@ final class PendingProbe
 
     private bool $sent = false;
 
-    public function __construct(private readonly TestCase $testCase)
+    private readonly Closure $actingAs;
+
+    private readonly Closure $json;
+
+    public function __construct(TestCase $testCase)
     {
+        if (! is_callable([$testCase, 'json']) || ! is_callable([$testCase, 'actingAs'])) {
+            throw new InvalidProbe('AccessProof requires a Laravel Feature TestCase with json() and actingAs().');
+        }
+
+        $this->actingAs = Closure::fromCallable([$testCase, 'actingAs']);
+        $this->json = Closure::fromCallable([$testCase, 'json']);
     }
 
     public function as(Authenticatable $actor, ?string $guard = null): self
@@ -64,11 +76,7 @@ final class PendingProbe
         return $this;
     }
 
-    /**
-     * Observe insertions or deletions that change the matching row count.
-     *
-     * @param array<string, int|float|string|bool|null> $where
-     */
+    /** @param array<string, int|float|string|bool|null> $where */
     public function watchCount(string $table, array $where = [], ?string $connection = null): self
     {
         $this->assertPending();
@@ -114,7 +122,7 @@ final class PendingProbe
             throw new InvalidProbe('Specify an HTTP request before sending.');
         }
 
-        if ($this->testCase->app === null || ! $this->testCase->app->environment('testing')) {
+        if (! app()->environment('testing')) {
             throw new UnsafeEnvironment('AccessProof runs only in Laravel testing environments.');
         }
 
@@ -136,15 +144,19 @@ final class PendingProbe
         }
 
         if ($this->actor !== null) {
-            $this->testCase->actingAs($this->actor, $this->guard);
+            ($this->actingAs)($this->actor, $this->guard);
         }
 
-        $response = $this->testCase->json(
+        $response = ($this->json)(
             $this->request['method'],
             $this->request['uri'],
             $this->request['data'],
             $this->headers,
         );
+
+        if (! $response instanceof TestResponse) {
+            throw new InvalidProbe('Laravel json() must return an Illuminate TestResponse.');
+        }
 
         return new ProbeResult($response, $snapshots, $counts);
     }

@@ -6,6 +6,4 @@ namespace Mykholy\AccessProof\Exceptions;
 
 use LogicException;
 
-final class InvalidProbe extends LogicException
-{
-}
+final class InvalidProbe extends LogicException {}

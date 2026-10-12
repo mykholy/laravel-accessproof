@@ -38,7 +38,7 @@ final class InvalidProbeTest extends TestCase
     public function test_watch_requires_a_persisted_row(): void
     {
         $this->expectException(InvalidProbe::class);
-        AccessProof::request($this)->watch(new Order())->getJson('/missing')->send();
+        AccessProof::request($this)->watch(new Order)->getJson('/missing')->send();
     }
 
     public function test_assert_unchanged_requires_an_explicit_watch(): void

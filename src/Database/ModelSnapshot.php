@@ -15,8 +15,8 @@ use Mykholy\AccessProof\Exceptions\InvalidProbe;
 final class ModelSnapshot
 {
     /**
-     * @param array<string, mixed> $before
-     * @param list<string> $columns
+     * @param  array<string, mixed>  $before
+     * @param  list<string>  $columns
      */
     private function __construct(
         private readonly Connection $connection,
@@ -25,8 +25,7 @@ final class ModelSnapshot
         private readonly int|string $key,
         private readonly array $before,
         private readonly array $columns,
-    ) {
-    }
+    ) {}
 
     /** @param list<string> $columns */
     public static function capture(Model $model, array $columns = []): self

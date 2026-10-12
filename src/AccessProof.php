@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Mykholy\AccessProof;
 
-use Illuminate\Foundation\Testing\TestCase;
 use Mykholy\AccessProof\Http\PendingProbe;
+use PHPUnit\Framework\TestCase;
 
 final class AccessProof
 {

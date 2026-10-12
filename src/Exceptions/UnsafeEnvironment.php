@@ -6,6 +6,4 @@ namespace Mykholy\AccessProof\Exceptions;
 
 use RuntimeException;
 
-final class UnsafeEnvironment extends RuntimeException
-{
-}
+final class UnsafeEnvironment extends RuntimeException {}

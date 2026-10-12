@@ -50,4 +50,6 @@ jobs:
         run: composer analyse
 
       - name: Formatting
-        run: composer format-check
+        run: |
+          composer format
+          git diff --exit-code -- src tests

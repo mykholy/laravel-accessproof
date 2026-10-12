@@ -20,8 +20,7 @@ final class TableCountSnapshot
         private readonly string $table,
         private readonly array $where,
         private readonly int $before,
-    ) {
-    }
+    ) {}
 
     /** @param array<string, int|float|string|bool|null> $where */
     public static function capture(ConnectionInterface $connection, string $table, array $where = []): self
@@ -31,7 +30,7 @@ final class TableCountSnapshot
         }
 
         foreach ($where as $column => $value) {
-            if (! is_string($column) || $column === '' || str_contains($column, '.')) {
+            if ($column === '' || str_contains($column, '.')) {
                 throw new InvalidArgumentException('Provide unqualified where column names.');
             }
         }
