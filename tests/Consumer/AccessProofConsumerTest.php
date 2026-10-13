@@ -21,6 +21,22 @@ final class AccessProofConsumerTest extends TestCase
             ->assertUnauthenticated();
     }
 
+    public function test_installed_package_compares_owner_and_outsider_access(): void
+    {
+        Route::middleware('auth')->get('/_accessproof/guarded/{owner}', function (string $owner) {
+            abort_unless((string) auth()->id() === $owner, 404);
+
+            return response()->json(['value' => 'PRIVATE_MARKER_1']);
+        });
+
+        AccessProof::compareRead($this)
+            ->owner(new GenericUser(['id' => 20]))
+            ->outsider(new GenericUser(['id' => 10]))
+            ->getJson('/_accessproof/guarded/20')
+            ->withoutBodyMarker('PRIVATE_MARKER_1')
+            ->verify();
+    }
+
     public function test_installed_package_executes_real_laravel_routes(): void
     {
         Route::middleware('auth')->get('/_accessproof/orders/{owner}', function (string $owner) {

@@ -46,6 +46,19 @@ abstract class TestCase extends Orchestra
             });
 
             // Deliberately vulnerable: a denied response still leaks a protected value.
+            Route::get('/api/leaky-protected-orders/{order}', function (int $order) {
+                $model = Order::query()->findOrFail($order);
+
+                if ($model->tenant_id !== auth()->user()->tenant_id) {
+                    return response()->json([
+                        'message' => 'Forbidden',
+                        'debug' => $model->secret,
+                    ], 403);
+                }
+
+                return response()->json($model);
+            });
+
             Route::get('/api/leaky-denials/{order}', function (int $order) {
                 $model = Order::query()->findOrFail($order);
 

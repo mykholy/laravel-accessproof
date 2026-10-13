@@ -2,6 +2,13 @@
 
 All notable user-facing changes are documented here.
 
+## 1.1.0 — 2026-10-13
+
+- Added `compareRead()` to verify owner-access and outsider-denial against the same GET route.
+- Added optional 2xx owner status and protected response marker checks.
+- Added negative regression tests for missing routes, public resources and denied responses that still leak private data.
+- Exercised the paired API in a clean Laravel consumer app and documented its boundaries.
+
 ## 1.0.1 — 2026-10-13
 
 - Expanded README with copyable owner/outsider tests, persisted-state assertions, API reference and explicit safety boundaries.
