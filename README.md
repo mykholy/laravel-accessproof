@@ -14,6 +14,8 @@ It is particularly useful for catching **broken object-level authorization (BOLA
 
 **AccessProof does not create permissions or policies.** It tests the behavior of the ones your application already has. It is not a route crawler or a security certification tool.
 
+For an anonymized example of the package used against a real SaaS codebase, read the [multi-tenant field report](docs/FIELD_REPORT.md). The work used real Laravel application routes, a disposable test database, and 28 integration tests; the underlying customer repository is private.
+
 ## Why it exists
 
 Consider a controller that updates an order and *then* responds with HTTP 403. A status-only test passes, even though the record was changed. AccessProof can combine the response assertion with a database snapshot:
