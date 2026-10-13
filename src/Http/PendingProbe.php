@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 use Mykholy\AccessProof\Database\ModelSnapshot;
 use Mykholy\AccessProof\Database\TableCountSnapshot;
+use Mykholy\AccessProof\Database\TableRowsSnapshot;
 use Mykholy\AccessProof\Exceptions\InvalidProbe;
 use Mykholy\AccessProof\Exceptions\UnsafeEnvironment;
 use PHPUnit\Framework\TestCase;
@@ -32,6 +33,9 @@ final class PendingProbe
 
     /** @var list<array{table: string, where: array<string, int|float|string|bool|null>, connection: ?string}> */
     private array $countWatches = [];
+
+    /** @var list<array{table: string, where: array<string, int|float|string|bool|null>, columns: list<string>, connection: ?string, keyColumn: string}> */
+    private array $rowWatches = [];
 
     private bool $sent = false;
 
@@ -81,6 +85,25 @@ final class PendingProbe
     {
         $this->assertPending();
         $this->countWatches[] = ['table' => $table, 'where' => $where, 'connection' => $connection];
+
+        return $this;
+    }
+
+    /**
+     * Watch the identities and values of matching rows, not just their count.
+     *
+     * @param  array<string, int|float|string|bool|null>  $where
+     * @param  list<string>  $columns
+     */
+    public function watchRows(
+        string $table,
+        array $where,
+        array $columns = [],
+        ?string $connection = null,
+        string $keyColumn = 'id',
+    ): self {
+        $this->assertPending();
+        $this->rowWatches[] = compact('table', 'where', 'columns', 'connection', 'keyColumn');
 
         return $this;
     }
@@ -143,6 +166,18 @@ final class PendingProbe
             );
         }
 
+        $rowSets = [];
+
+        foreach ($this->rowWatches as $watch) {
+            $rowSets[] = TableRowsSnapshot::capture(
+                DB::connection($watch['connection']),
+                $watch['table'],
+                $watch['where'],
+                $watch['columns'],
+                $watch['keyColumn'],
+            );
+        }
+
         if ($this->actor !== null) {
             ($this->actingAs)($this->actor, $this->guard);
         }
@@ -158,7 +193,7 @@ final class PendingProbe
             throw new InvalidProbe('Laravel json() must return an Illuminate TestResponse.');
         }
 
-        return new ProbeResult($response, $snapshots, $counts);
+        return new ProbeResult($response, $snapshots, $counts, $rowSets);
     }
 
     /** @param array<string, mixed> $data */

@@ -86,7 +86,23 @@ AccessProof::request($this)
 
 This is a row-count assertion. It cannot catch a denied create that inserts and deletes the same number of rows.
 
-## 4. Test response disclosure with a fixture marker
+## 4. Detect same-count replacements and bulk updates
+
+`watchCount()` verifies net cardinality, but not row identity or values. For scoped resources, use the bounded `watchRows()` assertion:
+
+```php
+AccessProof::request($this)
+    ->as($outsider)
+    ->watchRows('orders', ['tenant_id' => $targetTenantId], ['status'])
+    ->postJson('/api/orders/batch-action')
+    ->send()
+    ->assertDenied()
+    ->assertUnchanged();
+```
+
+The predicate must not be empty. It watches a maximum of 500 matching rows with a single-column key (`id` by default); larger datasets require a narrower predicate. There is no automatic tenancy setup or SQL write capture.
+
+## 5. Test response disclosure with a fixture marker
 
 Set a protected attribute of an order to a unique synthetic value. Then test that the response, including a 403 response with an error payload, never contains it.
 
@@ -101,7 +117,7 @@ AccessProof::request($this)
 
 The method performs a substring check of the raw response body; it does not parse semantics or check response headers.
 
-## 5. Guest vs authenticated
+## 6. Guest vs authenticated
 
 Do not confuse authentication and authorization. Guests often receive 401, while authenticated outsiders receive 403 or 404.
 

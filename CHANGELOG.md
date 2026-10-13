@@ -2,6 +2,12 @@
 
 All notable user-facing changes are documented here.
 
+## 1.2.0 — 2026-10-13
+
+- Added bounded `watchRows()` snapshots to detect same-count replacements, inserts, deletes and updates for explicitly scoped row sets.
+- Added intentionally vulnerable bulk-update and net-zero replacement fixtures, plus input validation and 500-row bound tests.
+- Declared PHPUnit as a runtime dependency because the public API uses PHPUnit types and assertions at runtime.
+
 ## 1.1.0 — 2026-10-13
 
 - Added `compareRead()` to verify owner-access and outsider-denial against the same GET route.

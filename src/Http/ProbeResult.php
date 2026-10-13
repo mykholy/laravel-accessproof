@@ -8,6 +8,7 @@ use Illuminate\Testing\TestResponse;
 use InvalidArgumentException;
 use Mykholy\AccessProof\Database\ModelSnapshot;
 use Mykholy\AccessProof\Database\TableCountSnapshot;
+use Mykholy\AccessProof\Database\TableRowsSnapshot;
 use PHPUnit\Framework\Assert;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,11 +18,13 @@ final class ProbeResult
      * @param  TestResponse<Response>  $response
      * @param  list<ModelSnapshot>  $snapshots
      * @param  list<TableCountSnapshot>  $counts
+     * @param  list<TableRowsSnapshot>  $rowSets
      */
     public function __construct(
         private readonly TestResponse $response,
         private readonly array $snapshots,
         private readonly array $counts = [],
+        private readonly array $rowSets = [],
     ) {}
 
     /** @return TestResponse<Response> */
@@ -80,7 +83,7 @@ final class ProbeResult
     public function assertUnchanged(): self
     {
         Assert::assertTrue(
-            $this->snapshots !== [] || $this->counts !== [],
+            $this->snapshots !== [] || $this->counts !== [] || $this->rowSets !== [],
             'Register a watched model or row count before asserting unchanged state.',
         );
 
@@ -93,6 +96,10 @@ final class ProbeResult
 
         foreach ($this->counts as $count) {
             Assert::assertNull($count->change(), 'Protected table row count changed.');
+        }
+
+        foreach ($this->rowSets as $rowSet) {
+            Assert::assertFalse($rowSet->changed(), 'Protected '.$rowSet->label().' changed.');
         }
 
         return $this;
