@@ -134,6 +134,21 @@ final class AuthorizationProbeTest extends TestCase
         $result->assertBodyDoesNotContain('CANARY-ORDER-SECRET-42');
     }
 
+    public function test_forbidden_status_does_not_hide_a_body_disclosure(): void
+    {
+        $outsider = $this->user(1);
+        $order = $this->order(2);
+
+        $result = AccessProof::request($this)
+            ->as($outsider)
+            ->getJson('/api/leaky-denials/'.$order->id)
+            ->send()
+            ->assertForbidden();
+
+        $this->expectException(AssertionFailedError::class);
+        $result->assertBodyDoesNotContain('CANARY-ORDER-SECRET-42');
+    }
+
     public function test_guest_is_separate_from_authorization_failure(): void
     {
         $order = $this->order(2);
