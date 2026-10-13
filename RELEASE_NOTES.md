@@ -1,24 +1,32 @@
-# Laravel AccessProof v1.0.1
+# Laravel AccessProof v1.1.0
 
-A documentation and regression-testing maintenance update, with no changes to the public API.
+A backwards-compatible feature release that closes a common authorization-testing blind spot: a 404 response can come from a missing route, not from a correct access policy.
 
-## Improvements
+## New: paired read boundary verification
 
-- Thorough README with install instructions, tested scenarios, sample PHPUnit feature tests and full API reference.
-- New test cookbook for ownership, cross-tenant access, denied writes and response-body leaks.
-- Clarified test-environment safety, unobserved side effects and 404 false positives.
-- Updated package description, discovery keywords and maintainer/support links.
-- A new negative regression fixture ensures that a 403 response containing protected data is caught by the leak assertion.
+```php
+AccessProof::compareRead($this)
+    ->owner($owner)
+    ->outsider($outsider)
+    ->getJson('/api/orders/'.$order->getKey())
+    ->withoutBodyMarker('PRIVATE_TEST_MARKER')
+    ->verify();
+```
 
-## Compatibility
+This tests the exact same URI with an authorized owner (HTTP 200 by default) and an unauthorized outsider (HTTP 403 or 404); the optional marker must not appear in the outsider response. Use `expectedOwnerStatus(204)` for a different successful 2xx contract.
 
-- PHP 8.3+; Laravel 12/13.
-- PHPUnit, PHPStan, Pint, MySQL 8, PostgreSQL 16 and independent consumer installation are exercised in CI.
+## Test coverage
 
-## Installation
+New intentionally failing fixtures for non-existent routes, exposed resources and denied responses that still leak protected markers. Exercised in the independent Laravel application as well as SQLite, MySQL 8 and PostgreSQL 16 CI matrix.
 
-~~~bash
-composer require --dev mykholy/laravel-accessproof:^1.0
-~~~
+## Boundaries
 
-See [README](README.md) for usage and limitations. AccessProof is an explicit test library, not an automatic security scanner.
+The new helper only handles GET requests. Use the explicit watched database assertions for mutating requests. Authentication and tenant switching remain the host application's responsibility. It does not crawl routes, enumerate tenants or certify application security.
+
+## Install
+
+```bash
+composer require --dev mykholy/laravel-accessproof:^1.1
+```
+
+See [README](README.md) and [Scenario cookbook](docs/SCENARIOS.md) for examples and safety requirements.

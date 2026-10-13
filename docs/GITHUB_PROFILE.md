@@ -16,4 +16,4 @@ Use these exact fields in **GitHub → mykholy/laravel-accessproof → About →
 
 **Settings:** Keep Issues enabled. Consider enabling Discussions when there is active community demand.
 
-GitHub's description, homepage and topics are repository metadata; editing this file does not change those fields.
+As of the October 13 review, description and homepage have already been set; topics still need adding via the About edit dialog. GitHub's description, homepage and topics are repository metadata; editing this file does not change those fields.

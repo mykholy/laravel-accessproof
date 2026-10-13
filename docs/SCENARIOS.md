@@ -25,6 +25,21 @@ Fill in the real policy for your application. Do not assume every endpoint uses 
 
 ## 1. Pair denied and allowed reads
 
+Use `compareRead()` for ordinary protected GET resources. A missing route cannot pass its owner control:
+
+```php
+AccessProof::compareRead($this)
+    ->owner($owner)
+    ->outsider($outsider)
+    ->getJson('/api/orders/'.$order->getKey())
+    ->withoutBodyMarker('TEST_SECRET_42')
+    ->verify();
+```
+
+For unusual contracts or separate policy checks, the lower-level probes remain available.
+
+### Manual owner and outsider probes
+
 Use two different users against **the same URI**. The owner control prevents a nonexistent route from masquerading as a secure 404.
 
 ```php

@@ -83,6 +83,23 @@ final class OrderAuthorizationTest extends TestCase
 
 **Why the positive control matters:** `assertDenied()` accepts 403 or 404, because some applications intentionally return 404 for inaccessible records. A nonexistent route can also return 404. Always verify the same route with an authorized user in a separate control.
 
+## Verified read boundaries (recommended)
+
+A plain `assertDenied()` can pass on a missing route because it accepts HTTP 404. For sensitive GET endpoints, prefer a **paired owner/outsider verification** that first proves the route works for the owner:
+
+```php
+AccessProof::compareRead($this)
+    ->owner($owner)
+    ->outsider($outsider)
+    ->getJson('/api/orders/'.$order->getKey())
+    ->withoutBodyMarker('ACCESSPROOF_TEST_SECRET_42')
+    ->verify();
+```
+
+This issues two real Laravel GET test requests to the **same URI**. The owner must receive HTTP 200 (or another 2xx status configured with `expectedOwnerStatus(204)`); the outsider must receive 403/404. When a protected marker is supplied, it must not occur in the outsider's response body.
+
+The check is deliberately GET-only. Use your usual tests to prove writes are authorized, and use the explicit `watch()` / `watchCount()` assertions below to detect side effects on denied writes. Authentication and tenant context are still managed by the host application; the outsider remains authenticated at the end of the comparison.
+
 ## Check unauthorized writes
 
 ### Updates and deletes of existing rows
@@ -140,6 +157,7 @@ Use a deliberately created fixture marker, not real credentials or customer data
 | Method | Behavior |
 | --- | --- |
 | `AccessProof::request($this)` | Begin a single-use probe from a Laravel PHPUnit Feature TestCase |
+| `AccessProof::compareRead($this)` | Begin a paired owner/outsider GET verification |
 | `as($user, $guard = null)` | Authenticate the given user (optionally with a named guard) |
 | `withHeaders(['X-Key' => 'value'])` | Include request headers |
 | `getJson($uri)` | Configure a GET request |
@@ -157,6 +175,8 @@ Use a deliberately created fixture marker, not real credentials or customer data
 | `assertBodyDoesNotContain($marker)` | Ensure the raw response body omits a marker |
 | `assertUnchanged()` | Ensure every watched row/count is unchanged |
 | `response()` | Access Laravel's underlying `TestResponse` |
+
+Paired comparisons support `owner($actor, $guard = null)`, `outsider($actor, $guard = null)`, `getJson($uri)`, `expectedOwnerStatus($status)`, `withoutBodyMarker($marker)`, and `verify()`.
 
 Each probe accepts exactly **one request** and cannot be reused after `send()`. Probe configuration must happen before sending.
 
