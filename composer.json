@@ -21,12 +21,12 @@
     }
   ],
   "require": {
+    "laravel/framework": "^12.0 || ^13.0",
     "php": "^8.3",
-    "laravel/framework": "^12.0 || ^13.0"
+    "phpunit/phpunit": "^11.5.50 || ^12.5.8 || ^13.0"
   },
   "require-dev": {
     "orchestra/testbench": "^10.0 || ^11.0",
-    "phpunit/phpunit": "^11.5.50 || ^12.5.8 || ^13.0",
     "larastan/larastan": "^3.0",
     "laravel/pint": "^1.0"
   },

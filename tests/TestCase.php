@@ -73,6 +73,24 @@ abstract class TestCase extends Orchestra
                 abort(403);
             });
 
+            Route::post('/api/broken-replacements', function () {
+                $order = Order::query()->where('tenant_id', 2)->firstOrFail();
+                $order->delete();
+
+                Order::query()->create([
+                    'tenant_id' => 2,
+                    'status' => 'pending',
+                    'secret' => 'replacement',
+                ]);
+
+                abort(403);
+            });
+
+            Route::patch('/api/broken-bulk-orders', function () {
+                Order::query()->where('tenant_id', 2)->update(['status' => 'paid']);
+                abort(403);
+            });
+
             Route::post('/api/broken-orders', function () {
                 Order::query()->create([
                     'tenant_id' => (int) request()->input('tenant_id'),

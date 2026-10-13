@@ -1,32 +1,35 @@
-# Laravel AccessProof v1.1.0
+# Laravel AccessProof v1.2.0
 
-A backwards-compatible feature release that closes a common authorization-testing blind spot: a 404 response can come from a missing route, not from a correct access policy.
+A backwards-compatible feature release for more complete persisted-state regression tests.
 
-## New: paired read boundary verification
+## New: watchRows()
 
 ```php
-AccessProof::compareRead($this)
-    ->owner($owner)
-    ->outsider($outsider)
-    ->getJson('/api/orders/'.$order->getKey())
-    ->withoutBodyMarker('PRIVATE_TEST_MARKER')
-    ->verify();
+AccessProof::request($this)
+    ->as($outsider)
+    ->watchRows('orders', ['tenant_id' => $targetTenantId], ['status'])
+    ->postJson('/api/orders/batch-action')
+    ->send()
+    ->assertDenied()
+    ->assertUnchanged();
 ```
 
-This tests the exact same URI with an authorized owner (HTTP 200 by default) and an unauthorized outsider (HTTP 403 or 404); the optional marker must not appear in the outsider response. Use `expectedOwnerStatus(204)` for a different successful 2xx contract.
+The new watch compares matching row identities and selected persisted values. It catches unauthorized updates or row replacements even when counts stay constant. It requires an explicit equality predicate and a unique single-column key, uses raw query builder reads, and refuses to capture more than 500 matching rows.
 
-## Test coverage
+The existing `watch()` and `watchCount()` methods remain available and unchanged.
 
-New intentionally failing fixtures for non-existent routes, exposed resources and denied responses that still leak protected markers. Exercised in the independent Laravel application as well as SQLite, MySQL 8 and PostgreSQL 16 CI matrix.
+## Package correctness
 
-## Boundaries
+PHPUnit is now explicitly declared in the runtime dependency set. This is needed because the public API uses PHPUnit assertion classes and test-case type hints.
 
-The new helper only handles GET requests. Use the explicit watched database assertions for mutating requests. Authentication and tenant switching remain the host application's responsibility. It does not crawl routes, enumerate tenants or certify application security.
+## Compatibility
+
+The test suite runs with PHP 8.3/8.4, Laravel 12/13, SQLite, MySQL 8, PostgreSQL 16 and an independent Laravel installation. New negative fixtures cover updates to other rows, net-zero row replacements and bounded snapshot validation.
 
 ## Install
 
 ```bash
-composer require --dev mykholy/laravel-accessproof:^1.1
+composer require --dev mykholy/laravel-accessproof:^1.2
 ```
 
-See [README](README.md) and [Scenario cookbook](docs/SCENARIOS.md) for examples and safety requirements.
+AccessProof runs only in Laravel testing environments. It neither discovers routes automatically nor certifies application security.

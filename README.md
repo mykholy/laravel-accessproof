@@ -137,6 +137,22 @@ AccessProof::request($this)
 
 A count watch detects **net row-count changes only**. It cannot detect updates or an insert plus delete that cancel each other out. The optional third argument selects a named Laravel database connection.
 
+### A whole tenant's rows (detects net-zero replacements)
+
+`watchCount()` cannot detect a delete followed by an insert when the total number of rows stays unchanged. `watchRows()` takes a bounded snapshot of the identities and selected column values of every row matching an explicit predicate:
+
+```php
+AccessProof::request($this)
+    ->as($outsider)
+    ->watchRows('orders', ['tenant_id' => $targetTenantId], ['status', 'total'])
+    ->postJson('/api/orders/batch-action')
+    ->send()
+    ->assertDenied()
+    ->assertUnchanged();
+```
+
+It detects changed rows, deleted rows, new rows, and same-count replacements within the matching set. By default it uses an `id` primary key; a different single-column key can be passed as the fifth argument, after the optional connection. **The equality predicate is required**, SQL column names must be simple unqualified identifiers, and a snapshot is limited to **500 matching rows** to avoid unbounded database reads. Select only the columns you need. For larger datasets, narrow the predicate or write a dedicated integration assertion. It does not track activity outside the specified predicate.
+
 ### Response-body disclosure
 
 If a resource contains a unique synthetic marker, assert that it never appears in an unauthorized response:
@@ -167,6 +183,7 @@ Use a deliberately created fixture marker, not real credentials or customer data
 | `deleteJson($uri, $data)` | Configure a DELETE request |
 | `watch($model, $columns = [])` | Snapshot an existing Eloquent record |
 | `watchCount($table, $where = [], $connection = null)` | Snapshot the matching SQL row count |
+| `watchRows($table, $where, $columns = [], $connection = null, $keyColumn = 'id')` | Watch matching row identities and values, limited to 500 rows |
 | `send()` | Execute one in-process request and obtain a probe result |
 | `assertAllowed($status = 200)` | Assert an expected authorized status |
 | `assertDenied()` | Assert HTTP 403 or 404 |
@@ -186,7 +203,7 @@ Each probe accepts exactly **one request** and cannot be reused after `send()`. 
 - **Explicit scenarios only.** It does not discover all routes or prove full authorization coverage; you must write tests for meaningful actor/resource/action combinations.
 - **HTTP response is not the whole story.** Always pair denial assertions with owner controls and, for writes, relevant persisted-state watches.
 - **No asynchronous or external side-effect monitoring.** Queues, remote APIs, emails, files and other databases are not observed unless explicitly checked by your host test.
-- **Watch what matters.** An unwatched row, a transient mutation later reverted, or two count changes that net to zero can escape detection.
+- **Watch what matters.** An unwatched row or a transient mutation later reverted can escape detection. Use `watchRows()` rather than `watchCount()` for net-zero replacements; it covers only your bounded predicate.
 - **Authentication persists in the host test case.** `as()` uses Laravel's `actingAs()`. Put guest tests in a fresh test method instead of assuming another probe automatically logs out.
 
 See [Testing scenarios](docs/SCENARIOS.md) and [Architecture / trust boundaries](docs/ARCHITECTURE.md) for practical guidance.
