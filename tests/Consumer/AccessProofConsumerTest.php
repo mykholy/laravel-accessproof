@@ -7,8 +7,8 @@ namespace Tests\Feature;
 use Illuminate\Auth\GenericUser;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use Mykholy\AccessProof\AccessProof;
 use Tests\TestCase;
 
@@ -73,6 +73,7 @@ final class AccessProofConsumerTest extends TestCase
 
         $this->assertSame('pending', DB::table('_accessproof_fixture_orders')->value('status'));
     }
+
     public function test_installed_package_executes_real_laravel_routes(): void
     {
         Route::middleware('auth')->get('/_accessproof/orders/{owner}', function (string $owner) {
