@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/accessproof-readme-hero.webp" width="1600" alt="Laravel AccessProof — authorization regression testing for IDOR/BOLA, cross-tenant access, and unauthorized writes">
+  <img src="assets/neon_laravel_accessproof_security_banner.png" width="1600" alt="Laravel AccessProof — authorization regression testing for IDOR/BOLA, cross-tenant access, and unauthorized writes">
 </p>
 
 <h1 align="center">Laravel AccessProof</h1>
