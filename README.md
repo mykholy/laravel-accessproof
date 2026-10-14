@@ -1,12 +1,28 @@
-# Laravel AccessProof
+<p align="center">
+  <img src="assets/accessproof-banner.svg" width="1440" alt="Laravel AccessProof: test IDOR/BOLA, cross-tenant access and unauthorized database writes in real Laravel HTTP feature tests">
+</p>
 
-**Test what users can actually access — and what denied requests might still change.**
+<h1 align="center">Laravel AccessProof</h1>
 
-[![Tests](https://github.com/mykholy/laravel-accessproof/actions/workflows/tests.yml/badge.svg)](https://github.com/mykholy/laravel-accessproof/actions/workflows/tests.yml)
-[![Latest release](https://img.shields.io/github/v/release/mykholy/laravel-accessproof)](https://github.com/mykholy/laravel-accessproof/releases)
-[![Packagist](https://img.shields.io/packagist/v/mykholy/laravel-accessproof)](https://packagist.org/packages/mykholy/laravel-accessproof)
-[![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4)](composer.json)
-[![License](https://img.shields.io/github/license/mykholy/laravel-accessproof)](LICENSE)
+<p align="center"><strong>Test what users can actually access — and what denied requests might still change.</strong></p>
+
+<p align="center">
+  <a href="https://github.com/mykholy/laravel-accessproof/actions/workflows/tests.yml"><img alt="Tests" src="https://github.com/mykholy/laravel-accessproof/actions/workflows/tests.yml/badge.svg"></a>
+  <a href="https://github.com/mykholy/laravel-accessproof/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/mykholy/laravel-accessproof"></a>
+  <a href="https://packagist.org/packages/mykholy/laravel-accessproof"><img alt="Packagist" src="https://img.shields.io/packagist/v/mykholy/laravel-accessproof"></a>
+  <a href="https://packagist.org/packages/mykholy/laravel-accessproof"><img alt="Downloads" src="https://img.shields.io/packagist/dt/mykholy/laravel-accessproof"></a>
+  <a href="composer.json"><img alt="Laravel 12 and 13" src="https://img.shields.io/badge/Laravel-12%20%7C%2013-ff2d20"></a>
+  <a href="composer.json"><img alt="PHP 8.3 and newer" src="https://img.shields.io/badge/PHP-8.3%2B-777bb4"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/mykholy/laravel-accessproof"></a>
+</p>
+
+<p align="center">
+  <a href="#installation">Installation</a> ·
+  <a href="#quick-start-an-ownership-regression-test">Quick start</a> ·
+  <a href="#check-unauthorized-writes">Unauthorized writes</a> ·
+  <a href="docs/SCENARIOS.md">Scenarios</a> ·
+  <a href="docs/FIELD_REPORT.md">Field report</a>
+</p>
 
 AccessProof is a small, test-only Laravel package for **runtime authorization regression testing**. It runs real in-process HTTP requests using your application's routes, authentication and authorization rules, then asserts the expected response and, where requested, the persisted database state.
 
