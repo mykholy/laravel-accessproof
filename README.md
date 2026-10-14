@@ -14,7 +14,7 @@ It is particularly useful for catching **broken object-level authorization (BOLA
 
 **AccessProof does not create permissions or policies.** It tests the behavior of the ones your application already has. It is not a route crawler or a security certification tool.
 
-For an anonymized example of the package used against a real SaaS codebase, read the [multi-tenant field report](docs/FIELD_REPORT.md). The work used real Laravel application routes, a disposable test database, and 28 integration tests; the underlying customer repository is private.
+For an anonymized example used against a real SaaS codebase, read the [multi-tenant field report](docs/FIELD_REPORT.md). The package ran against real Laravel routes on disposable SQLite and MySQL 8 databases: **34 integration tests and 86 assertions on each engine**. The host application repository is private.
 
 ## Why it exists
 
@@ -37,7 +37,7 @@ The test fails if the response is not 403/404 **or** the watched record changed.
 Requires PHP **8.3+** and Laravel **12 or 13**.
 
 ```bash
-composer require --dev mykholy/laravel-accessproof:^1.0
+composer require --dev mykholy/laravel-accessproof:^1.2
 ```
 
 Install it in **require-dev**, not in production dependencies. No configuration, migration, service provider or Artisan command is required. Use it from your application's Laravel Feature Tests (PHPUnit).

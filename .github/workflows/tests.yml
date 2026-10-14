@@ -125,3 +125,26 @@ jobs:
           cp tests/Consumer/AccessProofConsumerTest.php consumer/tests/Feature/AccessProofConsumerTest.php
           cd consumer
           php artisan test --filter AccessProofConsumerTest
+
+  packagist-consumer:
+    name: Install stable release directly from Packagist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, dom, xml, sqlite3, pdo_sqlite
+          coverage: none
+      - name: Create independent Laravel app
+        run: composer create-project laravel/laravel:^13 consumer --no-interaction --prefer-dist --no-progress
+      - name: Require published stable AccessProof from Packagist
+        run: |
+          cd consumer
+          composer require --dev "mykholy/laravel-accessproof:^1.2" --no-interaction --no-progress
+          composer show mykholy/laravel-accessproof
+      - name: Run published package consumer fixture
+        run: |
+          cp tests/Consumer/AccessProofConsumerTest.php consumer/tests/Feature/AccessProofConsumerTest.php
+          cd consumer
+          php artisan test --filter AccessProofConsumerTest

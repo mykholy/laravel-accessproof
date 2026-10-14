@@ -11,12 +11,12 @@ AccessProof started with deliberately vulnerable fixtures inside the package's o
 | Application | Private, multi-tenant Laravel CRM/SaaS |
 | Package | `mykholy/laravel-accessproof:^1.2` |
 | Data | Synthetic users, tenants, conversations, requests and tickets |
-| Isolation | Laravel test environment and disposable SQLite database |
-| CI integration | Independent job in the application's existing test workflow |
-| Final suite | **28 passing tests, 69 assertions** |
-| Regressions reproduced before fixes | **6 authorization failures** across tenant-level and user-level boundaries |
+| Isolation | Laravel testing environment; separate disposable SQLite and MySQL 8 databases |
+| CI integration | SQLite isolation job and independent MySQL 8 integration job in the host application's CI |
+| Final suite | **34 passing tests, 86 assertions on SQLite and separately on MySQL 8** |
+| Regressions reproduced before fixes | **9 authorization failures**: 2 tenant selection, 4 within-tenant permissions, 3 cross-tenant relationships |
 
-The counts come from the private application's GitHub Actions logs. They are reported for transparency, not offered as independently reproducible public audit evidence. A passing suite proves only the actor-resource-action cases that were explicitly tested.
+These counts come from private host-app CI logs for both database engines. They document explicitly tested scenarios, not independently reproducible audit evidence or comprehensive certification.
 
 ## What the tests found
 
@@ -33,6 +33,16 @@ After those fixes, the team ran a second set of scenarios **within the same tena
 - One customer could update another customer's ticket.
 
 The application changes enforced tenant identity from the authenticated principal, then checked record-level visibility and separate permissions for modifying actions. Re-running the suite confirmed the authorization checks without breaking the tested owner/assignee controls.
+
+A third round examined IDs of related records supplied in otherwise authorized create/update requests. Three negative controls failed before fixes:
+
+- Ticket creation accepted another tenant's `user_id` and returned HTTP 201.
+- Ticket update accepted a foreign `contact_id` and returned HTTP 200.
+- Ticket creation accepted a foreign `service_request_id` and returned HTTP 201.
+
+The host application's fix validates all supported related record IDs against the authenticated tenant. Preventive tests added afterwards also verify that foreign queue and assignee IDs are rejected and same-tenant relationships still work; these were **not** counted as additional reproduced pre-fix failures.
+
+After the fixes, the same published v1.2 package passed **34 tests and 86 assertions on each of SQLite and MySQL 8**, all against disposable synthetic test data.
 
 These are application-level findings, **not vulnerabilities in AccessProof itself**, and no claim is made about any untested endpoint or production deployment.
 
@@ -81,6 +91,22 @@ AccessProof::request($this)
 
 A status assertion alone cannot prove that the write was blocked before a record changed. For new rows or bulk changes, use `watchRows()` or `watchCount()` as appropriate.
 
+### Related-record IDs must belong to the acting tenant
+
+Even an authorized ticket creator must not be able to associate a customer from another tenant:
+
+```php
+$probe = AccessProof::request($this)
+    ->as($tenantAdmin, 'sanctum')
+    ->watchRows('support_tickets', ['tenant_id' => $ownTenantId])
+    ->postJson('/api/tickets', ['subject' => 'Synthetic', 'user_id' => $foreignUserId])
+    ->send();
+
+$probe->response()->assertUnprocessable();
+$probe->assertUnchanged();
+```
+
+This is an illustrative pattern. Tenant-scoped validation belongs in the host application; AccessProof only tests its observable behavior.
 ## Practical lessons
 
 1. **Tenant boundaries and object permissions are separate controls.** A correct `tenant_id` filter does not prove that a customer owns the object or an employee is assigned to it.

@@ -1,30 +1,20 @@
-# Laravel AccessProof v1.2.0
+# Laravel AccessProof v1.2.1
 
-A backwards-compatible feature release for more complete persisted-state regression tests.
+This backwards-compatible patch focuses on **field-tested documentation and installation assurance**. The public PHP API and runtime implementation are unchanged from v1.2.0.
 
-## New: watchRows()
+## Independent SaaS verification
 
-```php
-AccessProof::request($this)
-    ->as($outsider)
-    ->watchRows('orders', ['tenant_id' => $targetTenantId], ['status'])
-    ->postJson('/api/orders/batch-action')
-    ->send()
-    ->assertDenied()
-    ->assertUnchanged();
-```
+The published package was installed as a Composer dev dependency in a separate private multi-tenant Laravel SaaS application and executed against actual application routes with disposable fixtures.
 
-The new watch compares matching row identities and selected persisted values. It catches unauthorized updates or row replacements even when counts stay constant. It requires an explicit equality predicate and a unique single-column key, uses raw query builder reads, and refuses to capture more than 500 matching rows.
+- Nine authorization defects were reproduced in the host application before fixes: two tenant-selection issues, four same-tenant object/role issues, and three cross-tenant related-record references.
+- After application fixes, **34 tests / 86 assertions passed on SQLite** and again on **MySQL 8**.
+- The host repository and customer systems remain private; this is a scoped regression-testing field report, not a comprehensive security certification.
 
-The existing `watch()` and `watchCount()` methods remain available and unchanged.
+See the [anonymized field report](docs/FIELD_REPORT.md) and updated [scenario cookbook](docs/SCENARIOS.md).
 
-## Package correctness
+## Publication quality
 
-PHPUnit is now explicitly declared in the runtime dependency set. This is needed because the public API uses PHPUnit assertion classes and test-case type hints.
-
-## Compatibility
-
-The test suite runs with PHP 8.3/8.4, Laravel 12/13, SQLite, MySQL 8, PostgreSQL 16 and an independent Laravel installation. New negative fixtures cover updates to other rows, net-zero row replacements and bounded snapshot validation.
+A dedicated independent Laravel 13 consumer job now installs the current **stable Packagist package**, while another consumer job installs the checked-out source. The fixture also exercises `watchRows()` with actual SQLite records.
 
 ## Install
 
@@ -32,4 +22,6 @@ The test suite runs with PHP 8.3/8.4, Laravel 12/13, SQLite, MySQL 8, PostgreSQL
 composer require --dev mykholy/laravel-accessproof:^1.2
 ```
 
-AccessProof runs only in Laravel testing environments. It neither discovers routes automatically nor certifies application security.
+Supported: PHP 8.3+, Laravel 12/13; verified with PHP 8.3/8.4, SQLite, MySQL 8, PostgreSQL 16 and an independent Laravel 13 application.
+
+Use only with isolated test databases and synthetic fixtures. AccessProof neither installs authorization policies nor crawls routes or monitors remote side effects.
