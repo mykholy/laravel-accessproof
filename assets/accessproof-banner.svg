@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="480" viewBox="0 0 1440 480" role="img" aria-labelledby="title desc">
+<title id="title">Laravel AccessProof</title>
+<desc id="desc">Catch authorization regressions in Laravel HTTP feature tests. Verify IDOR/BOLA, cross-tenant boundaries and unauthorized writes.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#07131d"/><stop offset=".52" stop-color="#0c2030"/><stop offset="1" stop-color="#062b29"/>
+  </linearGradient>
+  <linearGradient id="mint" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#90f7c1"/>
+  </linearGradient>
+  <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#102537"/><stop offset="1" stop-color="#08151f"/>
+  </linearGradient>
+  <radialGradient id="halo"><stop stop-color="#16c9a8" stop-opacity=".25"/><stop offset="1" stop-color="#16c9a8" stop-opacity="0"/></radialGradient>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+    <path d="M32 0H0V32" fill="none" stroke="#90f7c1" stroke-opacity=".06"/>
+  </pattern>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000" flood-opacity=".35"/>
+  </filter>
+</defs>
+<rect width="1440" height="480" rx="24" fill="url(#bg)"/>
+<rect width="1440" height="480" rx="24" fill="url(#grid)"/>
+<circle cx="1190" cy="230" r="340" fill="url(#halo)"/>
+<path d="M0 464 Q490 390 815 480" stroke="#44e5bb" stroke-opacity=".25" fill="none" stroke-width="2"/>
+<path d="M0 24 Q450 105 750 0" stroke="#44e5bb" stroke-opacity=".12" fill="none" stroke-width="2"/>
+<g transform="translate(75 61)">
+  <rect width="197" height="34" rx="17" fill="#123b39" stroke="#2dd4bf" stroke-opacity=".44"/>
+  <circle cx="19" cy="17" r="5" fill="#4fe0bd"/>
+  <text x="33" y="23" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#aaf9df" font-size="13" font-weight="700" letter-spacing="1.8">TEST-ONLY TOOLKIT</text>
+</g>
+<g transform="translate(80 133)" stroke-linejoin="round">
+  <rect width="92" height="96" rx="23" fill="#0f4c44" stroke="#52e6c1" stroke-opacity=".28"/>
+  <path d="M46 14 L76 25 V48 C76 68 64 79 46 87 C28 79 16 68 16 48 V25Z" fill="url(#mint)"/>
+  <path d="M46 29 L63 36 V49 C63 60 58 67 46 73 C34 67 29 60 29 49 V36Z" fill="#0d3132"/>
+  <rect x="39" y="46" width="14" height="13" rx="3" fill="#c1ffe9"/>
+  <path d="M41 46 V41 A5 5 0 0 1 51 41 V46" fill="none" stroke="#c1ffe9" stroke-width="3"/>
+</g>
+<text x="193" y="175" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="29" fill="#d5e9ef" font-weight="600">Laravel</text>
+<text x="193" y="231" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="59" font-weight="800" letter-spacing="-2.4" fill="#ffffff">Access<tspan fill="url(#mint)">Proof</tspan></text>
+<text x="78" y="292" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="29" font-weight="600" fill="#f1fffc">Test the authorization boundary.</text>
+<text x="78" y="330" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="22" fill="#bbd4d8">Not just the response status.</text>
+<g font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15" font-weight="650" fill="#aef8db">
+  <rect x="78" y="378" width="156" height="42" rx="21" fill="#0f3938" stroke="#4ce5be" stroke-opacity=".35"/>
+  <circle cx="100" cy="399" r="6" fill="#4de5bd"/><text x="115" y="404">IDOR / BOLA</text>
+  <rect x="246" y="378" width="188" height="42" rx="21" fill="#0f3938" stroke="#4ce5be" stroke-opacity=".35"/>
+  <circle cx="268" cy="399" r="6" fill="#4de5bd"/><text x="283" y="404">Cross-tenant</text>
+  <rect x="446" y="378" width="221" height="42" rx="21" fill="#0f3938" stroke="#4ce5be" stroke-opacity=".35"/>
+  <circle cx="468" cy="399" r="6" fill="#4de5bd"/><text x="483" y="404">Unauthorized writes</text>
+</g>
+<g filter="url(#shadow)">
+ <rect x="787" y="72" width="574" height="344" rx="21" fill="url(#panel)" stroke="#54968e" stroke-opacity=".5"/>
+ <path d="M808 115 H1340" stroke="#86b9b2" stroke-opacity=".19"/>
+ <circle cx="817" cy="94" r="6" fill="#f77970"/><circle cx="837" cy="94" r="6" fill="#eec36d"/><circle cx="857" cy="94" r="6" fill="#51dca4"/>
+ <text x="1147" y="100" fill="#7ba9aa" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="14">tests/Feature/</text>
+ <g font-family="SFMono-Regular,Consolas,DejaVu Sans Mono,monospace" font-size="18">
+  <text x="819" y="153" fill="#8df0d0">AccessProof<tspan fill="#d9eaf2">::request($this)</tspan></text>
+  <text x="838" y="190" fill="#a9d2e6">-&gt;as(<tspan fill="#f0cc9a">$outsider</tspan>)</text>
+  <text x="838" y="227" fill="#a9d2e6">-&gt;watch(<tspan fill="#f0cc9a">$order</tspan>, [...])</text>
+  <text x="838" y="264" fill="#a9d2e6">-&gt;patchJson(<tspan fill="#f0cc9a">$uri</tspan>, [...])</text>
+  <text x="838" y="301" fill="#a9d2e6">-&gt;send()</text>
+  <text x="838" y="338" fill="#8df0d0">-&gt;assertDenied()</text>
+  <text x="838" y="375" fill="#8df0d0">-&gt;assertUnchanged();</text>
+ </g>
+</g>
+</svg>
