@@ -1,0 +1,86 @@
+name: Convert README artwork to WebP
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/render-readme-webp.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: readme-webp-conversion
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    name: Render WEBP and update README
+    if: github.repository == 'mykholy/laravel-accessproof'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Install image renderer
+        run: |
+          python3 -m pip install --disable-pip-version-check --break-system-packages "CairoSVG==2.8.2" "Pillow==11.3.0"
+
+      - name: Render hero image and update README
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from io import BytesIO
+          from pathlib import Path
+
+          import cairosvg
+          from PIL import Image
+
+          source = Path('assets/accessproof-readme-hero.svg')
+          target = Path('assets/accessproof-readme-hero.webp')
+          readme_path = Path('README.md')
+          if not source.is_file():
+              raise SystemExit('Missing original hero image')
+          readme = readme_path.read_text(encoding='utf-8')
+          old = 'src="assets/accessproof-readme-hero.svg"'
+          if old not in readme:
+              raise SystemExit('README reference changed: refusing to make blind edits')
+
+          png_bytes = cairosvg.svg2png(
+              url=str(source), output_width=1600, output_height=760
+          )
+          with Image.open(BytesIO(png_bytes)) as im:
+              im.convert('RGB').save(
+                  target, 'WEBP', quality=90, method=6
+              )
+
+          with Image.open(target) as result:
+              assert result.format == 'WEBP'
+              assert result.size == (1600, 760)
+              result.verify()
+
+          readme_path.write_text(
+              readme.replace(old, 'src="assets/accessproof-readme-hero.webp"', 1),
+              encoding='utf-8',
+          )
+          print(f'Created {target} ({target.stat().st_size:,} bytes)')
+          PY
+
+      - name: Remove superseded SVG artwork
+        run: |
+          git rm assets/accessproof-readme-hero.svg assets/accessproof-banner.svg
+
+      - name: Commit generated WebP and README update
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md assets/accessproof-readme-hero.webp
+          git commit -m "docs: serve README hero as optimized WebP"
+          git push origin HEAD:main
