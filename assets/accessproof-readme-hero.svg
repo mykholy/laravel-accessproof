@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760" role="img" aria-labelledby="title description">
+<title id="title">Laravel AccessProof — Authorization Regression Testing</title>
+<desc id="description">Security-themed banner for a Laravel test-only package that detects IDOR/BOLA, cross-tenant access, and unauthorized database writes in feature tests.</desc>
+<defs>
+  <linearGradient id="background" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#050b12"/><stop offset="48%" stop-color="#081921"/><stop offset="100%" stop-color="#042f2a"/></linearGradient>
+  <linearGradient id="accent" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#b7ffb0"/><stop offset="55%" stop-color="#36e7bc"/><stop offset="100%" stop-color="#0cb6a7"/></linearGradient>
+  <linearGradient id="panel" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#0f2630"/><stop offset="100%" stop-color="#07121c"/></linearGradient>
+  <radialGradient id="glow"><stop offset="0%" stop-color="#16f3bb" stop-opacity=".31"/><stop offset="100%" stop-color="#16f3bb" stop-opacity="0"/></radialGradient>
+  <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse"><path d="M44 0H0V44" fill="none" stroke="#60f2d1" stroke-width="1" stroke-opacity=".075"/></pattern>
+  <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="12"/></filter>
+  <filter id="dropShadow" x="-40%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="15" stdDeviation="18" flood-color="#000" flood-opacity=".42"/></filter>
+</defs>
+<rect width="1600" height="760" rx="30" fill="url(#background)"/>
+<rect width="1600" height="760" rx="30" fill="url(#grid)"/>
+<ellipse cx="1190" cy="290" rx="470" ry="460" fill="url(#glow)"/>
+<ellipse cx="150" cy="760" rx="490" ry="280" fill="url(#glow)" opacity=".38"/>
+<g fill="none" stroke="#18d7b2" stroke-opacity=".24" stroke-width="2">
+<path d="M0 61 C290 40 334 146 580 118"/><path d="M945 2 L945 78 Q945 130 1000 130 H1190 Q1240 130 1240 80 L1240 0"/>
+<path d="M682 692 Q803 627 920 666 H1600"/><path d="M1457 0V110 Q1457 140 1490 140 H1600"/>
+</g>
+<g transform="translate(68 65)">
+<path d="M0 0 L47 -29 L93 0 L93 78 L48 105 L0 78Z" fill="#ff4538" opacity=".16" transform="translate(0 27)"/>
+<path d="M20 38 L50 20 L81 38 L81 66 L50 85 L20 67 Z M20 38 L50 57 L81 38 M50 57V85" stroke="#fa5344" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M51 57 L51 103 L98 130 L145 103 L145 53 L117 37 L91 52 L91 79 L118 94 L145 79" stroke="#fa5344" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".92"/>
+</g>
+<g font-family="Inter, Segoe UI, Arial, sans-serif">
+<text x="244" y="155" font-size="88" letter-spacing="-3.1" font-weight="780" fill="#f6fafc">Laravel</text>
+<text x="73" y="292" font-size="116" letter-spacing="-5.3" font-weight="800" fill="url(#accent)">AccessProof</text>
+<text x="75" y="370" font-size="29" font-weight="630" fill="#eef8fa">Authorization regression testing for Laravel.</text>
+<text x="75" y="421" font-size="25" fill="#aec7d0">Catch IDOR/BOLA, cross-tenant access,</text>
+<text x="75" y="457" font-size="25" fill="#aec7d0">and unauthorized writes in HTTP feature tests.</text>
+</g>
+<g transform="translate(75 520)" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">
+<rect x="0" y="0" width="195" height="58" rx="20" fill="#092d2b" stroke="#1ce7b8" stroke-opacity=".55"/>
+<circle cx="29" cy="29" r="12" fill="none" stroke="#51f2c9" stroke-width="3"/><path d="M22 29L27 34L37 23" stroke="#51f2c9" stroke-width="3" fill="none" stroke-linecap="round"/><text x="55" y="36" fill="#e9fffa">IDOR / BOLA</text>
+<rect x="210" y="0" width="199" height="58" rx="20" fill="#092d2b" stroke="#1ce7b8" stroke-opacity=".55"/>
+<circle cx="242" cy="25" r="8" fill="#3eebbd"/><circle cx="257" cy="27" r="6" fill="#3eebbd"/><path d="M226 43Q242 24 258 43 M253 42 Q263 31 273 43" fill="#3eebbd"/><text x="281" y="36" fill="#e9fffa">Cross-tenant</text>
+<rect x="424" y="0" width="274" height="58" rx="20" fill="#092d2b" stroke="#1ce7b8" stroke-opacity=".55"/>
+<rect x="450" y="20" width="22" height="20" rx="5" fill="none" stroke="#3eebbd" stroke-width="3"/><path d="M455 20V14Q461 6 468 14V20" stroke="#3eebbd" stroke-width="3" fill="none"/><text x="489" y="36" fill="#e9fffa">Unauthorized writes</text>
+</g>
+<g transform="translate(76 640)" font-family="Inter, Segoe UI, Arial, sans-serif">
+<rect width="192" height="40" rx="20" fill="#132b34" stroke="#657c8c" stroke-opacity=".45"/><text x="24" y="26" font-size="17" font-weight="700" fill="#c2d9df">Laravel 12 / 13</text>
+<text x="217" y="27" fill="#6da69f" font-size="17">Test-only • PHPUnit • MIT</text>
+</g>
+<g filter="url(#dropShadow)">
+<rect x="822" y="165" width="717" height="480" rx="27" fill="url(#panel)" stroke="#58cfc0" stroke-opacity=".62" stroke-width="1.8"/>
+<path d="M824 226 H1537" stroke="#82aeb1" stroke-opacity=".2" stroke-width="1.5"/>
+<circle cx="858" cy="195" r="8" fill="#f16a65"/><circle cx="885" cy="195" r="8" fill="#f5c74e"/><circle cx="912" cy="195" r="8" fill="#24cb8c"/>
+<text x="1208" y="203" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="16" fill="#7da8b2">tests/Feature/AuthorizationTest.php</text>
+<g font-family="SFMono-Regular,Consolas,Liberation Mono,monospace" font-size="23">
+<text x="868" y="285" fill="#78f8cc">AccessProof<tspan fill="#d8eaf2">::request($this)</tspan></text>
+<text x="905" y="336" fill="#afd2e5">-&gt;as(<tspan fill="#f7c18c">$outsider</tspan>)</text>
+<text x="905" y="387" fill="#afd2e5">-&gt;watch(<tspan fill="#f7c18c">$order</tspan>, [...])</text>
+<text x="905" y="438" fill="#afd2e5">-&gt;patchJson(<tspan fill="#f7c18c">$uri</tspan>, [...])</text>
+<text x="905" y="489" fill="#afd2e5">-&gt;send()</text>
+<text x="905" y="540" fill="#77f2c3">-&gt;assertDenied()</text>
+<text x="905" y="591" fill="#77f2c3">-&gt;assertUnchanged();</text>
+</g>
+</g>
+<g transform="translate(1445 58)" filter="url(#dropShadow)">
+<path d="M0 0L85 30V95Q85 166 0 208Q-85 166 -85 95V30Z" fill="#0c463d" stroke="#5bfbd3" stroke-width="4"/>
+<path d="M0 22L61 44V97Q61 148 0 181Q-61 148 -61 97V44Z" fill="#042820" stroke="#38d9b3" stroke-width="2"/>
+<path d="M-23 88 V72 A23 23 0 0 1 23 72V88" fill="none" stroke="#48eebd" stroke-width="10" stroke-linecap="round"/>
+<rect x="-33" y="85" width="66" height="62" rx="11" fill="url(#accent)"/>
+<circle cx="0" cy="112" r="6" fill="#04372f"/><path d="M0 116V128" stroke="#04372f" stroke-width="6" stroke-linecap="round"/>
+</g>
+<rect x="1" y="1" width="1598" height="758" rx="29" fill="none" stroke="#69f0d0" stroke-opacity=".19" stroke-width="2"/>
+</svg>
