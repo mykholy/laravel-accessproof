@@ -130,7 +130,7 @@ AccessProof::request($this)
 
 Write the guest case in a separate PHPUnit test method. Laravel `actingAs()` persists on the host test case after a probe.
 
-## 6. Multi-tenant applications
+## 7. Multi-tenant applications
 
 AccessProof does not resolve tenancy or switch databases for you. Your application must establish the correct tenant context before running each probe.
 
@@ -138,6 +138,22 @@ AccessProof does not resolve tenancy or switch databases for you. Your applicati
 - **Separate-database tenancy:** ensure the host test switches the correct connection before taking snapshots; the watched Eloquent model uses its bound connection.
 - **Queues and async workflows:** test them separately in your application's integration suite; AccessProof does not observe asynchronous effects.
 
+## 8. Verify related-object ownership on authorized writes
+
+An actor authorized to create or edit a record must not be able to supply IDs belonging to a different tenant (for example, `customer_id`, `queue_id`, or `assigned_to_id`).
+
+```php
+$probe = AccessProof::request($this)
+    ->as($authorizedActor, 'sanctum')
+    ->watchRows('tickets', ['tenant_id' => $ownTenantId])
+    ->postJson('/api/tickets', ['customer_id' => $foreignCustomerId])
+    ->send();
+
+$probe->response()->assertUnprocessable();
+$probe->assertUnchanged();
+```
+
+Also write a positive control using a same-tenant customer ID. The host application must implement tenant-scoped validation or policy checks; AccessProof does not add them.
 ## Common false positives
 
 - A 404 caused by a missing route. Fix with an authorized user control.

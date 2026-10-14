@@ -2,6 +2,14 @@
 
 All notable user-facing changes are documented here.
 
+## 1.2.1 — 2026-10-14
+
+- Updated the anonymized SaaS field report: 34 tests and 86 assertions confirmed on both SQLite and MySQL 8; nine application authorization defects reproduced and addressed.
+- Documented foreign-tenant related-record ID checks with positive and negative authorization controls.
+- Added a clean Laravel consumer job that installs the **already published stable package from Packagist**, independently of the existing source-path consumer smoke test.
+- Extended the consumer fixture to exercise `watchRows()` persisted-state assertions.
+- No public PHP API or runtime implementation changes compared with v1.2.0.
+
 ## 1.2.0 — 2026-10-13
 
 - Added bounded `watchRows()` snapshots to detect same-count replacements, inserts, deletes and updates for explicitly scoped row sets.

@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use Illuminate\Auth\GenericUser;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Route;
 use Mykholy\AccessProof\AccessProof;
 use Tests\TestCase;
@@ -37,6 +40,39 @@ final class AccessProofConsumerTest extends TestCase
             ->verify();
     }
 
+    public function test_installed_package_watches_scoped_database_rows(): void
+    {
+        Schema::create('_accessproof_fixture_orders', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('tenant_id');
+            $table->string('status');
+        });
+
+        $orderId = DB::table('_accessproof_fixture_orders')->insertGetId([
+            'tenant_id' => 91,
+            'status' => 'pending',
+        ]);
+
+        Route::middleware('auth')->post('/_accessproof/fixture-orders/{order}', function (int $order) {
+            abort_unless((int) auth()->id() === $order, 403);
+
+            DB::table('_accessproof_fixture_orders')
+                ->where('id', $order)
+                ->update(['status' => 'paid']);
+
+            return response()->json(['ok' => true]);
+        });
+
+        AccessProof::request($this)
+            ->as(new GenericUser(['id' => 123]))
+            ->watchRows('_accessproof_fixture_orders', ['tenant_id' => 91], ['status'])
+            ->postJson('/_accessproof/fixture-orders/'.$orderId)
+            ->send()
+            ->assertForbidden()
+            ->assertUnchanged();
+
+        $this->assertSame('pending', DB::table('_accessproof_fixture_orders')->value('status'));
+    }
     public function test_installed_package_executes_real_laravel_routes(): void
     {
         Route::middleware('auth')->get('/_accessproof/orders/{owner}', function (string $owner) {
