@@ -234,6 +234,8 @@ See [Testing scenarios](docs/SCENARIOS.md) and [Architecture / trust boundaries]
 | 8.4 | 12 | Automated |
 | 8.3 | 13 | Automated |
 | 8.4 | 13 | Automated |
+| 8.5 | 12 | Automated |
+| 8.5 | 13 | Automated |
 
 The CI suite also exercises SQLite, MySQL 8 and PostgreSQL 16, and installs the package in an independent Laravel 13 application. [View the current CI results](https://github.com/mykholy/laravel-accessproof/actions/workflows/tests.yml).
 
