@@ -4,3 +4,4 @@
 /phpstan.neon.dist export-ignore
 /pint.json export-ignore
 /.editorconfig export-ignore
+/assets/neon_laravel_accessproof_security_banner.png export-ignore
