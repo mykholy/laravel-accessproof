@@ -21,7 +21,8 @@
   <a href="#quick-start-an-ownership-regression-test">Quick start</a> ·
   <a href="#check-unauthorized-writes">Unauthorized writes</a> ·
   <a href="docs/SCENARIOS.md">Scenarios</a> ·
-  <a href="docs/FIELD_REPORT.md">Field report</a>
+  <a href="docs/FIELD_REPORT.md">Field report</a> ·
+  <a href="docs/DEVELOPER_GUIDE.md">Developer guide</a>
 </p>
 
 AccessProof is a small, test-only Laravel package for **runtime authorization regression testing**. It runs real in-process HTTP requests using your application's routes, authentication and authorization rules, then asserts the expected response and, where requested, the persisted database state.
