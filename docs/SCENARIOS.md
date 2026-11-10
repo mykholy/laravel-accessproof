@@ -165,3 +165,19 @@ Also write a positive control using a same-tenant customer ID. The host applicat
 ## What to include in a bug report
 
 Include your PHP/Laravel versions, the exact assertion, an isolated route/controller/policy fixture, and expected/actual responses. Remove production data, passwords and API keys.
+
+## Denied write must not enqueue work or emit a domain event
+
+```php
+AccessProof::request($this)
+    ->as($outsider)
+    ->watch($order, ['status'])
+    ->watchJobs([SendInvoice::class])
+    ->watchEvents([OrderPaid::class])
+    ->postJson('/api/orders/'.$order->getKey().'/pay')
+    ->send()
+    ->assertForbidden()
+    ->assertNoSideEffects();
+```
+
+These are scoped, opt-in fakes; only dispatch attempts occurring in the request are observed. Use real application job/event classes in your host test and separate tests for worker/listener effects.
