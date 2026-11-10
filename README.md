@@ -172,6 +172,32 @@ AccessProof::request($this)
 
 It detects changed rows, deleted rows, new rows, and same-count replacements within the matching set. By default it uses an `id` primary key; a different single-column key can be passed as the fifth argument, after the optional connection. **The equality predicate is required**, SQL column names must be simple unqualified identifiers, and a snapshot is limited to **500 matching rows** to avoid unbounded database reads. Select only the columns you need. For larger datasets, narrow the predicate or write a dedicated integration assertion. It does not track activity outside the specified predicate.
 
+## Guard against queued jobs and event dispatches
+
+A denied HTTP request can enqueue a job or emit a domain event **before** returning 403. Watch these additional side effects with Laravel's scoped test fakes:
+
+```php
+AccessProof::request($this)
+    ->as($outsider)
+    ->watch($order, ['status'])
+    ->watchJobs([SendInvoice::class])
+    ->watchEvents([OrderPaid::class])
+    ->postJson('/api/orders/'.$order->id.'/pay')
+    ->send()
+    ->assertForbidden()
+    ->assertNoSideEffects();
+```
+
+`assertNoSideEffects()` checks **only the watches you registered**: database snapshots, queued jobs and/or events. Or use `assertNoJobsQueued()` and `assertNoEventsDispatched()` independently. These assertions require their corresponding `watchJobs()` / `watchEvents()` calls before `send()`.
+
+- `watchJobs()` intercepts **all** queued jobs in the request and asserts none were pushed (including raw queue payloads). `watchJobs([SendInvoice::class])` still fakes all queued jobs for isolation, but checks only the named classes. Synchronous bus commands and actual worker execution are not inspected.
+- `watchEvents([OrderPaid::class])` fakes and checks **only** those named events; unrelated listeners still execute. This is the recommended mode when model/auth events are important to the request.
+- `watchEvents()` fakes and checks **all** dispatched events, including framework events. It can prevent application listeners/observers from running and may require narrower watches for meaningful tests.
+- Fakes are installed **only during** the in-process HTTP request and original Laravel Queue/Event dispatchers (including Eloquent's model dispatcher) are restored afterwards, even when a request throws. Existing test fakes are restored too.
+- Interception changes execution: queued jobs do not execute and faked event listeners do not run. These assertions verify **dispatch attempts** in the request, not effects of a worker, after-response callback, external API, notification, mail, or a process outside the request. Use additional host integration tests for those effects. Raw queue pushes are checked only with unfiltered `watchJobs()`.
+
+Use an authorized owner request as a positive control, and run these tests only against disposable environments.
+
 ### Response-body disclosure
 
 If a resource contains a unique synthetic marker, assert that it never appears in an unauthorized response:
@@ -203,6 +229,8 @@ Use a deliberately created fixture marker, not real credentials or customer data
 | `watch($model, $columns = [])` | Snapshot an existing Eloquent record |
 | `watchCount($table, $where = [], $connection = null)` | Snapshot the matching SQL row count |
 | `watchRows($table, $where, $columns = [], $connection = null, $keyColumn = 'id')` | Watch matching row identities and values, limited to 500 rows |
+| `watchJobs($classes = [])` | Fake all queued jobs, optionally assert only selected job classes |
+| `watchEvents($events = [])` | Fake selected events, or all events when empty |
 | `send()` | Execute one in-process request and obtain a probe result |
 | `assertAllowed($status = 200)` | Assert an expected authorized status |
 | `assertDenied()` | Assert HTTP 403 or 404 |
@@ -210,6 +238,9 @@ Use a deliberately created fixture marker, not real credentials or customer data
 | `assertUnauthenticated()` | Assert HTTP 401 specifically |
 | `assertBodyDoesNotContain($marker)` | Ensure the raw response body omits a marker |
 | `assertUnchanged()` | Ensure every watched row/count is unchanged |
+| `assertNoJobsQueued()` | Assert no watched jobs (or raw pushes in all-jobs mode) |
+| `assertNoEventsDispatched()` | Assert no watched event dispatches |
+| `assertNoSideEffects()` | Assert all configured DB, queue and event watches |
 | `response()` | Access Laravel's underlying `TestResponse` |
 
 Paired comparisons support `owner($actor, $guard = null)`, `outsider($actor, $guard = null)`, `getJson($uri)`, `expectedOwnerStatus($status)`, `withoutBodyMarker($marker)`, and `verify()`.
@@ -221,7 +252,7 @@ Each probe accepts exactly **one request** and cannot be reused after `send()`. 
 - **Test environment only.** AccessProof refuses to send requests unless Laravel reports `APP_ENV=testing`. That check cannot detect a misconfigured database connection. **Never point the testing environment at a production database.**
 - **Explicit scenarios only.** It does not discover all routes or prove full authorization coverage; you must write tests for meaningful actor/resource/action combinations.
 - **HTTP response is not the whole story.** Always pair denial assertions with owner controls and, for writes, relevant persisted-state watches.
-- **No asynchronous or external side-effect monitoring.** Queues, remote APIs, emails, files and other databases are not observed unless explicitly checked by your host test.
+- **Scoped queue/event dispatch checks are opt-in.** These intercept dispatch attempts within the request, not eventual worker results or effects outside the process. Remote APIs, emails, files and other databases still need host tests. Faked events can suppress listeners.
 - **Watch what matters.** An unwatched row or a transient mutation later reverted can escape detection. Use `watchRows()` rather than `watchCount()` for net-zero replacements; it covers only your bounded predicate.
 - **Authentication persists in the host test case.** `as()` uses Laravel's `actingAs()`. Put guest tests in a fresh test method instead of assuming another probe automatically logs out.
 

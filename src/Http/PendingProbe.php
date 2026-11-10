@@ -8,6 +8,10 @@ use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Testing\Fakes\EventFake;
+use Illuminate\Support\Testing\Fakes\QueueFake;
 use Illuminate\Testing\TestResponse;
 use Mykholy\AccessProof\Database\ModelSnapshot;
 use Mykholy\AccessProof\Database\TableCountSnapshot;
@@ -36,6 +40,12 @@ final class PendingProbe
 
     /** @var list<array{table: string, where: array<string, int|float|string|bool|null>, columns: list<string>, connection: ?string, keyColumn: string}> */
     private array $rowWatches = [];
+
+    /** @var list<string>|null Null means disabled; an empty list watches all queued jobs. */
+    private ?array $jobWatches = null;
+
+    /** @var list<string>|null Null means disabled; an empty list watches all events. */
+    private ?array $eventWatches = null;
 
     private bool $sent = false;
 
@@ -104,6 +114,34 @@ final class PendingProbe
     ): self {
         $this->assertPending();
         $this->rowWatches[] = compact('table', 'where', 'columns', 'connection', 'keyColumn');
+
+        return $this;
+    }
+
+    /**
+     * Intercept queued jobs for this request. An empty list watches every job;
+     * a list checks only those classes, while all jobs remain faked.
+     *
+     * @param  list<class-string>  $jobs
+     */
+    public function watchJobs(array $jobs = []): self
+    {
+        $this->assertPending();
+        $this->jobWatches = $jobs;
+
+        return $this;
+    }
+
+    /**
+     * Intercept selected events (or every event when no list is supplied).
+     * Other events still run their listeners when a list is provided.
+     *
+     * @param  list<string>  $events
+     */
+    public function watchEvents(array $events = []): self
+    {
+        $this->assertPending();
+        $this->eventWatches = $events;
 
         return $this;
     }
@@ -182,18 +220,58 @@ final class PendingProbe
             ($this->actingAs)($this->actor, $this->guard);
         }
 
-        $response = ($this->json)(
-            $this->request['method'],
-            $this->request['uri'],
-            $this->request['data'],
-            $this->headers,
-        );
+        $queueFake = null;
+        $eventFake = null;
+
+        $execute = function () use (&$queueFake, &$eventFake) {
+            if ($this->jobWatches !== null) {
+                $queueFake = Queue::getFacadeRoot();
+
+                if (! $queueFake instanceof QueueFake) {
+                    throw new InvalidProbe('Laravel did not install the expected QueueFake.');
+                }
+            }
+
+            if ($this->eventWatches !== null) {
+                $eventFake = Event::getFacadeRoot();
+
+                if (! $eventFake instanceof EventFake) {
+                    throw new InvalidProbe('Laravel did not install the expected EventFake.');
+                }
+            }
+
+            return ($this->json)(
+                $this->request['method'],
+                $this->request['uri'],
+                $this->request['data'],
+                $this->headers,
+            );
+        };
+
+        // Laravel's scoped fakes restore the original dispatchers even if
+        // the in-process request throws. Nothing leaks into later probes.
+        $withEvents = fn () => $this->eventWatches !== null
+            ? Event::fakeFor($execute, $this->eventWatches)
+            : $execute();
+
+        $response = $this->jobWatches !== null
+            ? Queue::fakeFor($withEvents)
+            : $withEvents();
 
         if (! $response instanceof TestResponse) {
             throw new InvalidProbe('Laravel json() must return an Illuminate TestResponse.');
         }
 
-        return new ProbeResult($response, $snapshots, $counts, $rowSets);
+        return new ProbeResult(
+            $response,
+            $snapshots,
+            $counts,
+            $rowSets,
+            $queueFake,
+            $this->jobWatches,
+            $eventFake,
+            $this->eventWatches,
+        );
     }
 
     /** @param array<string, mixed> $data */
